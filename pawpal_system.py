@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from datetime import date, time, datetime, timedelta
 
 @dataclass
@@ -10,7 +10,7 @@ class Task:
     priority: int  # 1-5, higher is more important
     frequency: str  # e.g., "daily", "weekly"
     preferred_time: str  # e.g., "morning", "evening"
-    due_date: date | None = None
+    due_date: Optional[date] = None
     completion_status: bool = False
 
     def is_due(self, check_date: date) -> bool:
@@ -227,7 +227,7 @@ class Scheduler:
 
         return warnings
 
-    def filter_tasks(self, completed: bool | None = None, pet_name: str | None = None) -> List[Task]:
+    def filter_tasks(self, completed: Optional[bool] = None, pet_name: Optional[str] = None) -> List[Task]:
         """Return tasks filtered by completion status and/or pet name."""
         tasks = self.owner.get_all_tasks()
 

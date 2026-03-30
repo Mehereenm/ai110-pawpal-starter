@@ -24,6 +24,21 @@ PawPal+ now includes a smarter backend scheduling pipeline:
 - flexible sorting: tasks are sorted by priority and duration, and the scheduler offers a dedicated `sort_by_time()` helper.
 - conflict detection: built-in `detect_conflicts()` warns when tasks overlap in time (no crash mode).
 
+## Testing PawPal+
+
+Run:
+
+```bash
+python -m pytest
+```
+
+Tests cover:
+- Task behavior (completion, recurrence, adding tasks)
+- scheduler behavior (sorting, conflict detection, filtering by pet/completion)
+- daily plan generation and warning handling
+
+Confidence Level: (4/5 stars) based on a passing pytest run with 5 tests and strong core coverage.
+
 
 - Let a user enter basic owner + pet info
 - Let a user add/edit tasks (duration + priority at minimum)
