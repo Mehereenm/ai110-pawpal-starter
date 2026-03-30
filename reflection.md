@@ -51,6 +51,10 @@ The three core actions a user should be able to perform are:
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
 
+The scheduler uses a basic method to detect conflicts. It only checks if tasks overlap in time and gives a warning if they do. It doesn’t try to fix the conflicts by rearranging or splitting tasks.
+
+This keeps the system simple and fast, which is good for an early version (MVP). Instead of automatically solving conflicts, it lets the user see the issue and adjust task times or priorities themselves.
+
 ---
 
 ## 3. AI Collaboration

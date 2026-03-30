@@ -16,6 +16,15 @@ Your job is to design the system first (UML), then implement the logic in Python
 
 Your final app should:
 
+## Smarter Scheduling
+
+PawPal+ now includes a smarter backend scheduling pipeline:
+
+- recurring task handling: marking a `daily` or `weekly` task complete creates a new instance at `today + 1 day` or `today + 7 days` using `timedelta`.
+- flexible sorting: tasks are sorted by priority and duration, and the scheduler offers a dedicated `sort_by_time()` helper.
+- conflict detection: built-in `detect_conflicts()` warns when tasks overlap in time (no crash mode).
+
+
 - Let a user enter basic owner + pet info
 - Let a user add/edit tasks (duration + priority at minimum)
 - Generate a daily schedule/plan based on constraints and priorities

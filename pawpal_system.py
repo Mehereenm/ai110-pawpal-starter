@@ -10,6 +10,7 @@ class Task:
     priority: int  # 1-5, higher is more important
     frequency: str  # e.g., "daily", "weekly"
     preferred_time: str  # e.g., "morning", "evening"
+    due_date: date | None = None
     completion_status: bool = False
 
     def is_due(self, check_date: date) -> bool:
@@ -29,9 +30,31 @@ class Task:
         """Set the priority level of the task (1-5)."""
         self.priority = priority
 
-    def mark_complete(self):
-        """Mark the task as completed."""
+    def mark_complete(self) -> "Task | None":
+        """Mark the task as completed and create the next recurring instance if needed."""
         self.completion_status = True
+
+        if self.frequency not in {"daily", "weekly"}:
+            return None
+
+        # Compute next due date using timedelta
+        current_due = self.due_date if self.due_date is not None else date.today()
+        if self.frequency == "daily":
+            next_due = current_due + timedelta(days=1)
+        else:
+            next_due = current_due + timedelta(weeks=1)
+
+        # Return next instance for recurrence
+        return Task(
+            description=self.description,
+            category=self.category,
+            time=self.time,
+            priority=self.priority,
+            frequency=self.frequency,
+            preferred_time=self.preferred_time,
+            due_date=next_due,
+            completion_status=False,
+        )
 
 @dataclass
 class Pet:
@@ -109,13 +132,56 @@ class Scheduler:
         if pet in self.owner.pets:
             pet.remove_task(task)
 
+    def mark_task_complete(self, task: Task, pet: Pet):
+        """Mark a task complete for a given pet and add its next recurring instance if needed."""
+        if pet not in self.owner.pets:
+            raise ValueError("Pet not found for owner")
+
+        if task not in pet.tasks:
+            raise ValueError("Task not found for pet")
+
+        next_task = task.mark_complete()
+        if next_task is not None:
+            # Enqueue next recurrence instance
+            pet.add_task(next_task)
+        return next_task
+
+    def sort_by_time(self, tasks: List[Task]) -> List[Task]:
+        """Return tasks sorted by ascending duration (minutes)."""
+        return sorted(tasks, key=lambda t: t.time)
+
+    def detect_conflicts(self, plan: 'DailyPlan') -> List[str]:
+        """Return warning messages for overlapping task time ranges in a daily plan."""
+        warnings = []
+        entries = plan.scheduled_tasks
+
+        def minutes_of(t: time) -> int:
+            return t.hour * 60 + t.minute
+
+        for i in range(len(entries)):
+            for j in range(i + 1, len(entries)):
+                t1 = entries[i]
+                t2 = entries[j]
+                s1, e1 = minutes_of(t1['start_time']), minutes_of(t1['end_time'])
+                s2, e2 = minutes_of(t2['start_time']), minutes_of(t2['end_time'])
+
+                if s1 < e2 and s2 < e1:
+                    warnings.append(
+                        f"Conflict: '{t1['task'].description}' ({t1['task'].category}) overlaps "
+                        f"with '{t2['task'].description}' ({t2['task'].category})."
+                    )
+
+        return warnings
+
     def generate_daily_plan(self, plan_date: date) -> 'DailyPlan':
         """Generate a daily plan by scheduling due tasks in priority order."""
         tasks = self.owner.get_all_tasks()
         # Filter due and incomplete tasks
         due_tasks = [t for t in tasks if t.is_due(plan_date) and not t.completion_status]
-        # Sort by priority (higher first)
-        due_tasks.sort(key=lambda t: t.priority, reverse=True)
+        # Sort by priority (higher first), then by duration (shorter first)
+        due_tasks.sort(key=lambda t: (-t.priority, t.time))
+        # Optionally have an explicit time-sorted order method:
+        due_tasks = self.sort_by_time(due_tasks)
         # Simple scheduling: start at 8 AM, schedule sequentially
         scheduled = []
         current_time = time(8, 0)
@@ -128,12 +194,51 @@ class Scheduler:
             current_time = end
             total_time += task.time
         explanation = f"Scheduled {len(scheduled)} tasks in priority order, starting at 8:00 AM."
-        return DailyPlan(date=plan_date, scheduled_tasks=scheduled, total_time=total_time, explanation=explanation)
+        plan = DailyPlan(date=plan_date, scheduled_tasks=scheduled, total_time=total_time, explanation=explanation)
+        conflicts = self.detect_conflicts(plan)
+        plan.warnings = conflicts
+        return plan
 
     def optimize_schedule(self):
         """Placeholder for advanced schedule optimization logic."""
         # Placeholder for optimization logic, e.g., consider preferred times or constraints
         pass
+
+    def detect_conflicts(self, plan: 'DailyPlan') -> List[str]:
+        """Detect conflicts where tasks overlap in scheduled time windows."""
+        warnings = []
+        entries = plan.scheduled_tasks
+
+        def minutes_of(t: time) -> int:
+            return t.hour * 60 + t.minute
+
+        for i in range(len(entries)):
+            for j in range(i + 1, len(entries)):
+                t1 = entries[i]
+                t2 = entries[j]
+                s1, e1 = minutes_of(t1['start_time']), minutes_of(t1['end_time'])
+                s2, e2 = minutes_of(t2['start_time']), minutes_of(t2['end_time'])
+
+                if s1 < e2 and s2 < e1:  # Overlap check
+                    warnings.append(
+                        f"Conflict: '{t1['task'].description}' ({t1['task'].category}) overlaps "
+                        f"with '{t2['task'].description}' ({t2['task'].category})."
+                    )
+
+        return warnings
+
+    def filter_tasks(self, completed: bool | None = None, pet_name: str | None = None) -> List[Task]:
+        """Return tasks filtered by completion status and/or pet name."""
+        tasks = self.owner.get_all_tasks()
+
+        if pet_name is not None:
+            matching_pet = next((pet for pet in self.owner.pets if pet.name == pet_name), None)
+            tasks = matching_pet.tasks if matching_pet else []
+
+        if completed is not None:
+            tasks = [t for t in tasks if t.completion_status == completed]
+
+        return tasks
 
 @dataclass
 class DailyPlan:
@@ -141,6 +246,7 @@ class DailyPlan:
     scheduled_tasks: List[Dict[str, Any]]
     total_time: int
     explanation: str
+    warnings: List[str] = field(default_factory=list)
 
     def add_scheduled_task(self, task: Task, start_time: time, end_time: time):
         """Add a scheduled task with start and end times to the plan."""
