@@ -1,0 +1,71 @@
+classDiagram
+    class Pet {
+        +name: str
+        +species: str
+        +age: int
+        +special_needs: list[Task]
+        +tasks: list[Task]
+        +get_info(): dict
+        +update_info(new_info)
+        +add_task(task)
+        +remove_task(task)
+    }
+
+    class Task {
+        +description: str
+        +category: str
+        +time: int
+        +priority: int
+        +frequency: str
+        +preferred_time: str
+        +due_date: date?
+        +completion_status: bool
+        +is_due(check_date): bool
+        +get_time(): int
+        +set_priority(priority): void
+        +mark_complete(): Task | None
+    }
+
+    class Owner {
+        +name: str
+        +available_hours_per_day: int
+        +preferred_start_time: str
+        +preferred_end_time: str
+        +preferences: dict
+        +pets: list[Pet]
+        +get_available_time(): int
+        +update_preferences(new_prefs): void
+        +add_pet(pet): void
+        +get_all_tasks(): list[Task]
+    }
+
+    class Scheduler {
+        +owner: Owner
+        +constraints: dict
+        +add_task(task, pet)
+        +remove_task(task, pet)
+        +mark_task_complete(task, pet)
+        +generate_daily_plan(plan_date): DailyPlan
+        +sort_by_time(tasks): list[Task]
+        +filter_tasks(completed=None, pet_name=None): list[Task]
+        +detect_conflicts(plan): list[str]
+        +optimize_schedule()
+    }
+
+    class DailyPlan {
+        +date: date
+        +scheduled_tasks: list[dict]
+        +total_time: int
+        +explanation: str
+        +warnings: list[str]
+        +add_scheduled_task(task, start_time, end_time)
+        +get_plan_summary(): str
+        +explain_plan(): str
+    }
+
+    Scheduler --> Owner : uses
+    Scheduler --> Pet : references
+    Scheduler --> Task : manages
+    Scheduler --> DailyPlan : produces
+    Owner --> Pet : owns
+    Pet --> Task : manages

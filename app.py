@@ -128,9 +128,33 @@ st.caption("This button should call your scheduling logic once you implement it.
 if st.button("Generate Schedule"):
     if st.session_state.owner.pets and any(pet.tasks for pet in st.session_state.owner.pets):
         plan = st.session_state.scheduler.generate_daily_plan(date.today())
-        st.write("**Today's Schedule:**")
-        st.code(plan.get_plan_summary())
-        st.write("**Explanation:**")
-        st.write(plan.explain_plan())
+
+        # Show conflict warnings clearly
+        if plan.warnings:
+            for warning in plan.warnings:
+                st.warning(warning)
+
+        # Display summary as a table
+        schedule_rows = []
+        for item in plan.scheduled_tasks:
+            schedule_rows.append({
+                "Task": item["task"].description,
+                "Pet": next((pet.name for pet in st.session_state.owner.pets if item["task"] in pet.tasks), "Unknown"),
+                "Start": item["start_time"].strftime("%H:%M"),
+                "End": item["end_time"].strftime("%H:%M"),
+                "Priority": item["task"].priority,
+                "Duration": item["task"].time,
+            })
+        if schedule_rows:
+            st.success("Schedule generated successfully.")
+            st.table(schedule_rows)
+            st.info(plan.explain_plan())
+        else:
+            st.info("No tasks to schedule for today.")
+
+        # Also show sorted tasks for reference
+        sorted_tasks = st.session_state.scheduler.sort_by_time(st.session_state.owner.get_all_tasks())
+        st.subheader("Tasks sorted by duration")
+        st.table([{"Task": t.description, "Duration": t.time, "Priority": t.priority} for t in sorted_tasks])
     else:
         st.warning("Add pets and tasks first.")

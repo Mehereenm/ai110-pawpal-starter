@@ -61,13 +61,21 @@ This keeps the system simple and fast, which is good for an early version (MVP).
 
 **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+- Used VS Code Copilot to help set up the initial design (UML and basic class structure for Pet, Task, Owner, and Scheduler).
+- Used it to suggest coding patterns, like sorting tasks, using dataclasses, and simple logic for conflicts and recurring tasks.
+- Helpful prompts included things like:
+“sort tasks by duration in a scheduler”
+“detect overlap between task start and end times”
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+- One AI suggestion rejected: Copilot suggested a full backtracking interval scheduling conflict solver; I chose to keep a simpler, readable pairwise overlap warning strategy to avoid over-engineering.
+- Verified the system using unit tests (sorting, recurrence, and conflict detection) and by checking outputs from main.py.
+
+**c. Lead architect lesson**
+
+- Separating into phases (design, implementation, UI) kept focus and reduced scope creep; each phase had its own chat session.
+- Being the lead architect means you keep final control, prune suggestions, and enforce clear API boundaries through code and tests.
 
 ---
 
