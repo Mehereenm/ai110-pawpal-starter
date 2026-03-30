@@ -4,19 +4,21 @@
 
 **a. Initial design**
 
-The initial UML design for PawPal+ includes the following main classes to model the pet care planning system: Pet, Task, Owner, Scheduler, and DailyPlan. These classes encapsulate the data and logic for managing pet information, care tasks, owner constraints, scheduling logic, and the resulting daily plans.
+The PawPal+ system is built around five main parts: Pet, Task, Owner, Scheduler, and DailyPlan. Together, they help organize and plan pet care.
 
-- **Pet**: Represents the pet being cared for. Responsibilities: Store and manage pet details. Attributes: name (str), species (str), age (int), special_needs (list of str). Methods: __init__, get_info (return pet details as dict), update_info (modify pet attributes).
+Pet: Stores basic info about the pet (name, type, age, special needs) and lets you view or update it.
 
-- **Task**: Represents individual care tasks. Responsibilities: Define task properties and check scheduling relevance. Attributes: name (str), category (str), duration (int in minutes), priority (int 1-5), frequency (str), preferred_time (str or range). Methods: __init__, is_due (check if task is due on a given day), get_duration, set_priority.
+Task: Represents a care activity (like feeding or walking). It includes details like how long it takes, how important it is, how often it happens, and when it should be done.
 
-- **Owner**: Represents the pet owner. Responsibilities: Hold owner preferences and availability. Attributes: name (str), available_hours_per_day (int), preferred_start_time (str), preferred_end_time (str), preferences (dict). Methods: __init__, get_available_time, update_preferences.
+Owner: Holds information about the owner’s schedule and preferences, such as how much time they have each day and when they prefer to start or end tasks.
 
-- **Scheduler**: Core logic class for generating plans. Responsibilities: Manage tasks, apply constraints, and create daily schedules. Attributes: pet (Pet instance), owner (Owner instance), tasks (list of Task), constraints (dict). Methods: __init__, add_task, remove_task, generate_daily_plan (return DailyPlan based on tasks and constraints), optimize_schedule.
+Scheduler: The “brain” of the system. It takes the pet, owner, and tasks, applies any rules or limits, and creates a daily plan.
 
-- **DailyPlan**: Represents the output daily schedule. Responsibilities: Store and display scheduled tasks with explanations. Attributes: date (date), scheduled_tasks (list of dicts with task, start_time, end_time), total_time (int), explanation (str). Methods: __init__, add_scheduled_task, get_plan_summary, explain_plan.
+DailyPlan: The final schedule for the day. It lists tasks with their times, total time needed, and a short explanation of the plan.
 
 Relationships: Scheduler aggregates Pet, Owner, and a list of Tasks; it generates a DailyPlan. Tasks are associated with the Pet, and the Owner provides constraints for the Scheduler.
+
+The Scheduler uses the Pet, Owner, and Tasks to create a DailyPlan. Tasks are for the pet, and the owner’s availability helps decide when they can be done.
 
 **b. Design changes**
 
