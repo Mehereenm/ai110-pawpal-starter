@@ -40,11 +40,11 @@ Tests cover:
 Confidence Level: (4/5 stars) based on a passing pytest run with 5 tests and strong core coverage.
 
 
-- Let a user enter basic owner + pet info
-- Let a user add/edit tasks (duration + priority at minimum)
-- Generate a daily schedule/plan based on constraints and priorities
-- Display the plan clearly (and ideally explain the reasoning)
-- Include tests for the most important scheduling behaviors
+- Lets the user enter basic owner + pet info
+- Lets the user add/edit tasks (duration + priority at minimum)
+- Generates a daily schedule/plan based on constraints and priorities
+- Displays the plan clearly (and ideally explain the reasoning)
+- Includes tests for the most important scheduling behaviors
 
 ## Getting started
 
